@@ -3,6 +3,8 @@
 #TODO
 
 - [x] Create repo on Github
+- [ ] Set up environment on Dad's computer
+- [ ] Set up environment on CB's computer
 - [ ] Get (pay for?) Cursor
 - [ ] Get Raspberry Pi up and running
 - [ ] Get basic program running on pi (like light on and off)
