@@ -6,7 +6,7 @@
 - [x] Set up environment on Dad's computer
 - [x] Set up environment on CB's computer
 - [x] Get (pay for?) Cursor
-- [ ] Get Raspberry Pi up and running
+- [x] Get Raspberry Pi up and running
 - [ ] Get basic program running on pi (like light on and off)
 - [ ] Build goPiGo basic vehicle with wheels
 - [ ] Get vehicle to go various directions
