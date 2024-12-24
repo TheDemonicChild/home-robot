@@ -34,7 +34,8 @@ def resize_image(image_path, width=800):
 
 def add_bars(img, top_height=50, left_width=50, color="blue"):
     """
-    Adds bars to the top and left sides of the image and overlays letters A through H on the top bar.
+    Adds bars to the top and left sides of the image and overlays letters A through I on the top bar
+    and numbers 1 through 9 on the left bar.
     
     Args:
         img (Image.Image): PIL Image object.
@@ -43,7 +44,7 @@ def add_bars(img, top_height=50, left_width=50, color="blue"):
         color (str): Color of the bars.
     
     Returns:
-        Image.Image: Modified PIL Image object with bars and letters added.
+        Image.Image: Modified PIL Image object with bars and letters/numbers added.
     """
     draw = ImageDraw.Draw(img)
     width, height = img.size
@@ -56,9 +57,13 @@ def add_bars(img, top_height=50, left_width=50, color="blue"):
     left_bar = [(0, 0), (left_width, height)]
     draw.rectangle(left_bar, fill=color)
 
-    # Define the letters to add
+    # Define the letters to add on the top bar
     letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
     num_letters = len(letters)
+
+    # Define the numbers to add on the left bar
+    numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    num_numbers = len(numbers)
 
     # Load a bold font. You can specify a TTF font file if available.
     try:
@@ -69,12 +74,12 @@ def add_bars(img, top_height=50, left_width=50, color="blue"):
         font = ImageFont.load_default()
         print("Warning: Arial Black font not found. Using default font.")
 
-    # Updated spacing calculation
-    spacing = width / num_letters  # Remove the +1 to eliminate the right gap
+    # Add letters to the top bar
+    spacing_letters = width / num_letters  # Remove the +1 to eliminate the right gap
 
     for i, letter in enumerate(letters):
         # Calculate the position for each letter
-        x = spacing * (i + 0.5)  # Center each letter within its spacing
+        x = spacing_letters * (i + 0.5)  # Center each letter within its spacing
         y = 10  # Vertically center the text in the top bar
 
         # Get the bounding box of the letter
@@ -88,6 +93,26 @@ def add_bars(img, top_height=50, left_width=50, color="blue"):
 
         # Add the text to the image
         draw.text((text_x, text_y), letter, font=font, fill="white")
+
+    # Add numbers to the left bar
+    spacing_numbers = height / num_numbers  # Spacing based on the number of numbers
+
+    for i, number in enumerate(numbers):
+        # Calculate the position for each number
+        x = left_width / 2  # Center horizontally in the left bar
+        y = spacing_numbers * (i + 0.5)  # Center each number within its spacing
+
+        # Get the bounding box of the number
+        bbox = draw.textbbox((0, 0), number, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+
+        # Calculate the position to center the text
+        text_x = x - text_width / 2
+        text_y = y - text_height / 2
+
+        # Add the text to the image
+        draw.text((text_x, text_y), number, font=font, fill="white")
 
     return img
 
@@ -162,7 +187,8 @@ def send_image_analysis_request(prompt, image_path):
         return f"Error: {str(e)}"
 
 if __name__ == "__main__":
-    user_prompt = "What is this an image of?"
+    user_prompt = "Under what letter is the person's mouth? Format your response like this: 'Letter: X'"
     image_path = "images/1.jpg"  # Replace with the path to your image file
     answer = send_image_analysis_request(user_prompt, image_path)
+    print("User Prompt:", user_prompt)
     print("ChatGPT says:", answer)
