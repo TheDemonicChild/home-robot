@@ -4,6 +4,7 @@ import base64
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import os
+import sys
 
 # Load the API key from config.json
 with open("config.json", "r") as f:
@@ -187,7 +188,13 @@ def send_image_analysis_request(prompt, image_path):
         return f"Error: {str(e)}"
 
 if __name__ == "__main__":
-    user_prompt = "Under what letter is the person's mouth? Format your response like this: 'Letter: X'"
+    if len(sys.argv) > 1:
+        variable = " ".join(sys.argv[1:])
+        user_prompt = f"Under what letter is the {variable}? Format your response like this: 'Letter: X'"
+    else:
+        user_prompt = "Describe the image"
+        print("Note, next time you can pass in a variable to ask ChatGPT to find the location of, like 'mouth' or 'door'")
+    
     image_path = "images/1.jpg"  # Replace with the path to your image file
     answer = send_image_analysis_request(user_prompt, image_path)
     print("User Prompt:", user_prompt)
