@@ -7,11 +7,12 @@
 - [x] Set up environment on CB's computer
 - [x] Get (pay for?) Cursor
 - [x] Get Raspberry Pi up and running
-- [ ] Get basic program running on pi (like light on and off)
-- [ ] Build goPiGo basic vehicle with wheels
-- [ ] Get vehicle to go various directions
-- [ ] Figure out how to connect to ChatGPT (through laptop? Or direct from Pi)?
-- [ ] Figure out how to take photo and send to ChatGPT
+- [x] Connect to ElevenLabs API for text to speech
+- [x] Get basic program running on pi (like light on and off)
+- [x] Build goPiGo basic vehicle with wheels
+- [x] Get vehicle to go various directions
+- [x] Figure out how to connect to ChatGPT
+- [ ] Figure out how to take photo
 - [ ] Take response from ChatGPT - and do things.
 - [ ] Etc.
 - do more things! 

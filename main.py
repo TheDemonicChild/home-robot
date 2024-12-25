@@ -12,19 +12,31 @@ import cv2
 from datetime import datetime
 import time
 
+from utils import logger, timing  # Import the logger and timing decorator
+
 # Load the API key from config.json
-with open("config.json", "r") as f:
-    config = json.load(f)
+@timing
+def load_config():
+    with open("config.json", "r") as f:
+        return json.load(f)
+
+config = load_config()
 
 # Initialize the OpenAI client
-client = OpenAI(api_key=config["CHATGPT_API_KEY"])
+@timing
+def init_openai_client(api_key):
+    return OpenAI(api_key=api_key)
+
+client = init_openai_client(config["CHATGPT_API_KEY"])
 
 # Set the ElevenLabs API key
-EL_client = ElevenLabs(
-    api_key=config["ELEVEN_LABS_API_KEY"],
-)
+@timing
+def init_elevenlabs_client(api_key):
+    return ElevenLabs(api_key=api_key)
 
+EL_client = init_elevenlabs_client(config["ELEVEN_LABS_API_KEY"])
 
+@timing
 def resize_image(image_path, width=800):
     """
     Resizes the image to the specified width while maintaining aspect ratio.
@@ -45,6 +57,7 @@ def resize_image(image_path, width=800):
         resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
         return resized_img
 
+@timing
 def add_bars(img, top_height=50, left_width=50, color="blue"):
     """
     Adds bars to the top and left sides of the image and overlays letters A through I on the top bar
@@ -129,6 +142,7 @@ def add_bars(img, top_height=50, left_width=50, color="blue"):
 
     return img
 
+@timing
 def save_image(img, save_path, quality=85):
     """
     Saves the PIL Image object to the specified path.
@@ -140,6 +154,7 @@ def save_image(img, save_path, quality=85):
     """
     img.save(save_path, format="JPEG", quality=quality)
 
+@timing
 def encode_image(img, quality=85):
     """
     Encodes the PIL Image object to a base64 string.
@@ -156,6 +171,7 @@ def encode_image(img, quality=85):
     buffer.seek(0)
     return base64.b64encode(buffer.read()).decode("utf-8")
 
+@timing
 def send_image_analysis_request(prompt, image_path):
     try:
         # Ensure the 'images' directory exists
@@ -200,9 +216,11 @@ def send_image_analysis_request(prompt, image_path):
         )
         return response.choices[0].message.content
     except Exception as e:
+        logger.error(f"Error in 'send_image_analysis_request': {str(e)}")
         return f"Error: {str(e)}"
 
-if __name__ == "__main__":
+@timing
+def main_loop():
     while True:
         try:
             if len(sys.argv) > 1:
@@ -214,17 +232,6 @@ if __name__ == "__main__":
 
             photo = capture_photo()
             if photo is not None:
-                # Display the captured photo using OpenCV (optional)
-                # cv2.imshow("Captured Photo", photo)
-                # cv2.waitKey(0)
-                # cv2.destroyAllWindows()
-
-                # Further processing can be done here
-                # For example, converting the image to bytes
-                # _, buffer = cv2.imencode('.jpg', photo)
-                # photo_bytes = buffer.tobytes()
-                # Now you can send `photo_bytes` to other parts of your application
-
                 # Save the photo to a file with timestamp
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 image_path = f"images/{timestamp}.jpg"
@@ -232,7 +239,7 @@ if __name__ == "__main__":
             else:
                 print("Failed to capture photo.")
 
-            # image_path = "images/1.jpg"  # Replace with the path to your image file
+            # Analyze the image
             answer = send_image_analysis_request(user_prompt, image_path)
             print("User Prompt:", user_prompt)
             print("ChatGPT says:", answer)
@@ -246,8 +253,11 @@ if __name__ == "__main__":
             stream(audio_stream)
 
         except Exception as e:
-            print(f"An error occurred: {e}")
+            logger.error(f"An error occurred in 'main_loop': {e}")
 
         # Wait for 5 seconds before the next iteration
-        time.sleep(5)
+        #time.sleep(5)
+
+if __name__ == "__main__":
+    main_loop()
 
