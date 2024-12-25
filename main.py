@@ -7,6 +7,10 @@ import os
 import sys
 from elevenlabs import stream
 from elevenlabs.client import ElevenLabs
+from capture_photo import capture_photo
+import cv2
+from datetime import datetime
+import time
 
 # Load the API key from config.json
 with open("config.json", "r") as f:
@@ -163,8 +167,11 @@ def send_image_analysis_request(prompt, image_path):
         # Step 2: Add decorative bars and letters
         modified_img = add_bars(resized_img)
         
-        # Step 3: Save the modified image locally
-        save_image(modified_img, "images/1.modified.jpg", quality=85)
+        # Generate timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        # Step 3: Save the modified image locally with the new filename
+        save_image(modified_img, f"images/small_{timestamp}.jpg", quality=85)
         
         # Step 4: Encode the image to base64
         base64_image = encode_image(modified_img, quality=85)
@@ -196,23 +203,51 @@ def send_image_analysis_request(prompt, image_path):
         return f"Error: {str(e)}"
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        variable = " ".join(sys.argv[1:])
-        user_prompt = f"Under what letter is the {variable}? Format your response like this: 'Letter: X'"
-    else:
-        user_prompt = "Describe the image"
-        print("Note, next time you can pass in a variable to ask ChatGPT to find the location of, like 'mouth' or 'door'")
-    
-    image_path = "images/1.jpg"  # Replace with the path to your image file
-    answer = send_image_analysis_request(user_prompt, image_path)
-    print("User Prompt:", user_prompt)
-    print("ChatGPT says:", answer)
+    while True:
+        try:
+            if len(sys.argv) > 1:
+                variable = " ".join(sys.argv[1:])
+                user_prompt = f"Under what letter is the {variable}? Format your response like this: 'Letter: X'"
+            else:
+                user_prompt = "Describe the image"
+                print("Note, next time you can pass in a variable to ask ChatGPT to find the location of, like 'mouth' or 'door'")
 
-    # Say answer out loud with ElevenLabs
-    audio_stream = EL_client.text_to_speech.convert_as_stream(
-        text=answer,
-        voice_id="JBFqnCBsd6RMkjVDRZzb",
-        model_id="eleven_multilingual_v2"
-    )
-    stream(audio_stream)
+            photo = capture_photo()
+            if photo is not None:
+                # Display the captured photo using OpenCV (optional)
+                # cv2.imshow("Captured Photo", photo)
+                # cv2.waitKey(0)
+                # cv2.destroyAllWindows()
+
+                # Further processing can be done here
+                # For example, converting the image to bytes
+                # _, buffer = cv2.imencode('.jpg', photo)
+                # photo_bytes = buffer.tobytes()
+                # Now you can send `photo_bytes` to other parts of your application
+
+                # Save the photo to a file with timestamp
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                image_path = f"images/{timestamp}.jpg"
+                cv2.imwrite(image_path, photo)
+            else:
+                print("Failed to capture photo.")
+
+            # image_path = "images/1.jpg"  # Replace with the path to your image file
+            answer = send_image_analysis_request(user_prompt, image_path)
+            print("User Prompt:", user_prompt)
+            print("ChatGPT says:", answer)
+
+            # Say answer out loud with ElevenLabs
+            audio_stream = EL_client.text_to_speech.convert_as_stream(
+                text=answer,
+                voice_id="ESFCSGXf29OXVudtb0W7",
+                model_id="eleven_flash_v2_5"
+            )
+            stream(audio_stream)
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+        # Wait for 5 seconds before the next iteration
+        time.sleep(5)
 
