@@ -5,6 +5,8 @@ from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import os
 import sys
+from elevenlabs import stream
+from elevenlabs.client import ElevenLabs
 
 # Load the API key from config.json
 with open("config.json", "r") as f:
@@ -12,6 +14,12 @@ with open("config.json", "r") as f:
 
 # Initialize the OpenAI client
 client = OpenAI(api_key=config["CHATGPT_API_KEY"])
+
+# Set the ElevenLabs API key
+EL_client = ElevenLabs(
+    api_key=config["ELEVEN_LABS_API_KEY"],
+)
+
 
 def resize_image(image_path, width=800):
     """
@@ -199,3 +207,12 @@ if __name__ == "__main__":
     answer = send_image_analysis_request(user_prompt, image_path)
     print("User Prompt:", user_prompt)
     print("ChatGPT says:", answer)
+
+    # Say answer out loud with ElevenLabs
+    audio_stream = EL_client.text_to_speech.convert_as_stream(
+        text=answer,
+        voice_id="JBFqnCBsd6RMkjVDRZzb",
+        model_id="eleven_multilingual_v2"
+    )
+    stream(audio_stream)
+
