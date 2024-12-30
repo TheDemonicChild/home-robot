@@ -2,3 +2,4 @@ config.json
 /images
 /__pycache__
 /venv
+debug_timings.log

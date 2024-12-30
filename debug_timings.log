@@ -1,4 +1,0 @@
-2024-12-30 18:08:16,004 [ERROR] Usage: python3 main.py <parameter>
-2024-12-30 18:08:39,493 [INFO] Non-Raspberry Pi system detected. Using OpenCV to capture image.
-2024-12-30 18:08:42,427 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
-2024-12-30 18:08:42,735 [INFO] HTTP Request: POST https://api.elevenlabs.io/v1/text-to-speech/s3Z2DZH32dW8IHJFedam/stream "HTTP/1.1 200 OK"
