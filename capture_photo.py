@@ -24,28 +24,31 @@ def is_raspberry_pi():
 
 def capture_photo():
     """
-    Captures a photo using raspistill on Raspberry Pi or OpenCV on other systems.
+    Captures a photo using libcamera-still on Raspberry Pi or OpenCV on other systems.
 
     Returns:
         numpy.ndarray or None: Captured image as a NumPy array or None if capture failed.
     """
     if is_raspberry_pi():
-        logger.info("Detected Raspberry Pi. Using raspistill to capture image.")
+        logger.info("Detected Raspberry Pi. Using libcamera-still to capture image.")
         image_path = "/tmp/image.jpg"
         try:
-            # Capture image using raspistill with a 500ms preview
-            subprocess.run(["raspistill", "-o", image_path, "-t", "500"], check=True)
+            # Capture image using libcamera-still with a 500ms preview
+            subprocess.run(
+                ["libcamera-still", "--timeout", "500", "--output", image_path],
+                check=True
+            )
             # Read the captured image using OpenCV
             img = cv2.imread(image_path)
             if img is None:
-                logger.error("raspistill captured an empty image.")
+                logger.error("libcamera-still captured an empty image.")
                 return None
             return img
         except subprocess.CalledProcessError as e:
-            logger.error(f"raspistill command failed: {e}")
+            logger.error(f"libcamera-still command failed: {e}")
             return None
         except Exception as e:
-            logger.error(f"Unexpected error during image capture with raspistill: {e}")
+            logger.error(f"Unexpected error during image capture with libcamera-still: {e}")
             return None
     else:
         logger.info("Non-Raspberry Pi system detected. Using OpenCV to capture image.")

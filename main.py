@@ -245,6 +245,7 @@ def main(parameter):
                 cv2.imwrite(image_path, photo)
             else:
                 logger.error("Failed to capture photo.")
+                continue  # Skip processing if photo capture failed
 
             # Analyze the image
             answer = send_image_analysis_request(user_prompt, image_path)
