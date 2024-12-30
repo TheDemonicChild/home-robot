@@ -1,0 +1,47 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Execute Python Script</title>
+    <script>
+        async function sendInput() {
+            const input = document.getElementById('inputBox').value;
+            const responseParagraph = document.getElementById('response');
+
+            if (!input) {
+                responseParagraph.innerText = 'Please enter a value.';
+                return;
+            }
+
+            try {
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ input_value: input })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    responseParagraph.innerText = `Output: ${result.output}`;
+                } else {
+                    responseParagraph.innerText = `Error: ${result.message}`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                responseParagraph.innerText = 'An unexpected error occurred.';
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Execute Python Script</h1>
+    <input type="text" id="inputBox" placeholder="Enter a parameter">
+    <button onclick="sendInput()">Execute</button>
+    <p id="response"></p>
+</body>
+</html>

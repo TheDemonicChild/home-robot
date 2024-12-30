@@ -1,3 +1,4 @@
+import sys
 import json
 from openai import OpenAI
 import base64
@@ -11,6 +12,7 @@ from capture_photo import capture_photo
 import cv2
 from datetime import datetime
 import time
+import traceback
 
 from utils import logger, timing  # Import the logger and timing decorator
 
@@ -220,12 +222,17 @@ def send_image_analysis_request(prompt, image_path):
         return f"Error: {str(e)}"
 
 @timing
-def main_loop():
+def main(parameter):
+    """
+    Main function that processes the given parameter.
+    
+    Args:
+        parameter (str): The parameter to process.
+    """
     while True:
         try:
-            if len(sys.argv) > 1:
-                variable = " ".join(sys.argv[1:])
-                user_prompt = f"Under what letter is the {variable}? Format your response like this: 'Letter: X'"
+            if parameter:
+                user_prompt = f"{parameter}"
             else:
                 user_prompt = "Describe the image"
                 print("Note, next time you can pass in a variable to ask ChatGPT to find the location of, like 'mouth' or 'door'")
@@ -237,7 +244,7 @@ def main_loop():
                 image_path = f"images/{timestamp}.jpg"
                 cv2.imwrite(image_path, photo)
             else:
-                print("Failed to capture photo.")
+                logger.error("Failed to capture photo.")
 
             # Analyze the image
             answer = send_image_analysis_request(user_prompt, image_path)
@@ -247,17 +254,23 @@ def main_loop():
             # Say answer out loud with ElevenLabs
             audio_stream = EL_client.text_to_speech.convert_as_stream(
                 text=answer,
-                voice_id="ESFCSGXf29OXVudtb0W7",
+                voice_id="s3Z2DZH32dW8IHJFedam",
                 model_id="eleven_flash_v2_5"
             )
             stream(audio_stream)
 
         except Exception as e:
-            logger.error(f"An error occurred in 'main_loop': {e}")
+            logger.error(f"An error occurred in 'main': {e}")
+            logger.error(traceback.format_exc())
 
         # Wait for 5 seconds before the next iteration
-        #time.sleep(5)
+        time.sleep(5)
 
 if __name__ == "__main__":
-    main_loop()
+    if len(sys.argv) != 2:
+        logger.error("Usage: python3 main.py <parameter>")
+        sys.exit(1)
+    
+    input_parameter = sys.argv[1]
+    main(input_parameter)
 
