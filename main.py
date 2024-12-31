@@ -16,6 +16,8 @@ import traceback
 
 from utils import logger, timing  # Import the logger and timing decorator
 
+ENABLE_ELEVEN_LABS_VOICE = False
+
 # Load the API key from config.json
 @timing
 def load_config():
@@ -31,12 +33,14 @@ def init_openai_client(api_key):
 
 client = init_openai_client(config["CHATGPT_API_KEY"])
 
-# Set the ElevenLabs API key
-@timing
-def init_elevenlabs_client(api_key):
-    return ElevenLabs(api_key=api_key)
-
-EL_client = init_elevenlabs_client(config["ELEVEN_LABS_API_KEY"])
+if ENABLE_ELEVEN_LABS_VOICE:
+    # Initialize the ElevenLabs client
+    @timing
+    def init_elevenlabs_client(api_key):
+        return ElevenLabs(api_key=api_key)
+    
+    config = load_config()
+    EL_client = init_elevenlabs_client(config["ELEVEN_LABS_API_KEY"])
 
 @timing
 def resize_image(image_path, width=800):
@@ -252,13 +256,16 @@ def main(parameter):
             print("User Prompt:", user_prompt)
             print("ChatGPT says:", answer)
 
-            # Say answer out loud with ElevenLabs
-            audio_stream = EL_client.text_to_speech.convert_as_stream(
-                text=answer,
-                voice_id="s3Z2DZH32dW8IHJFedam",
-                model_id="eleven_flash_v2_5"
-            )
-            stream(audio_stream)
+            if ENABLE_ELEVEN_LABS_VOICE:
+                # Say answer out loud with ElevenLabs
+                audio_stream = EL_client.text_to_speech.convert_as_stream(
+                    text=answer,
+                    voice_id="s3Z2DZH32dW8IHJFedam",
+                    model_id="eleven_flash_v2_5"
+                )
+                stream(audio_stream)
+            else:
+                logger.info("Eleven Labs voice functionality is disabled. Skipping text-to-speech.")
 
         except Exception as e:
             logger.error(f"An error occurred in 'main': {e}")
