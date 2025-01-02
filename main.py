@@ -16,6 +16,12 @@ import traceback
 
 from utils import logger, timing  # Import the logger and timing decorator
 
+# Import colorama for colored terminal text
+from colorama import init, Fore, Style
+
+# Initialize colorama
+init(autoreset=True)
+
 ENABLE_ELEVEN_LABS_VOICE = False
 
 # Load the API key from config.json
@@ -226,20 +232,39 @@ def send_image_analysis_request(prompt, image_path):
         return f"Error: {str(e)}"
 
 @timing
-def main(parameter):
+def load_prompts():
     """
-    Main function that processes the given parameter.
+    Loads prompts from prompts/1.txt, prompts/2.txt, and prompts/3.txt.
     
-    Args:
-        parameter (str): The parameter to process.
+    Returns:
+        list: A list containing the content of each prompt file.
     """
+    prompt_files = ["prompts/1.txt", "prompts/2.txt", "prompts/3.txt"]
+    prompts = []
+    for file in prompt_files:
+        try:
+            with open(file, "r") as f:
+                prompts.append(f.read().strip())
+        except Exception as e:
+            logger.error(f"Failed to read {file}: {e}")
+            prompts.append("Describe the image")  # Fallback prompt
+    return prompts
+
+@timing
+def main():
+    """
+    Main function that processes images and sends analysis requests using prompts
+    from prompts/1.txt, prompts/2.txt, and prompts/3.txt in a round-robin fashion.
+    """
+    prompts = load_prompts()
+    prompt_count = len(prompts)
+    current_prompt_index = 0  # Initialize the round-robin index
+
     while True:
         try:
-            if parameter:
-                user_prompt = f"{parameter}"
-            else:
-                user_prompt = "Describe the image"
-                print("Note, next time you can pass in a variable to ask ChatGPT to find the location of, like 'mouth' or 'door'")
+            # Select the current prompt
+            user_prompt = prompts[current_prompt_index]
+            current_prompt_index = (current_prompt_index + 1) % prompt_count  # Update index for next iteration
 
             photo = capture_photo()
             if photo is not None:
@@ -253,8 +278,12 @@ def main(parameter):
 
             # Analyze the image
             answer = send_image_analysis_request(user_prompt, image_path)
-            print("User Prompt:", user_prompt)
-            print("ChatGPT says:", answer)
+            
+            # Print the original prompt in Blue
+            print(f"{Fore.BLUE}User Prompt: {user_prompt}{Style.RESET_ALL}")
+            
+            # Print ChatGPT's response in Green
+            print(f"{Fore.GREEN}ChatGPT says: {answer}{Style.RESET_ALL}")
 
             if ENABLE_ELEVEN_LABS_VOICE:
                 # Say answer out loud with ElevenLabs
@@ -275,10 +304,5 @@ def main(parameter):
         time.sleep(5)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        logger.error("Usage: python3 main.py <parameter>")
-        sys.exit(1)
-    
-    input_parameter = sys.argv[1]
-    main(input_parameter)
+    main()
 

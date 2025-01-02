@@ -16,3 +16,11 @@
 - [ ] Take response from ChatGPT - and do things.
 - [ ] Etc.
 - do more things! 
+
+
+# To start virtual environment
+
+```
+source venv/bin/activate
+```
+

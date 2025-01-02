@@ -3,5 +3,8 @@ You are helping guide a robot to explore a house. There are a few people and ani
 or
 [Say] Watch out, Lulu, coming through!
 But don't use those exact phrases.  Come up with something unique to each person or animal.  Could be around just saying hi, or making sure they dont get in the way, or anything else that makes sense for a robot that is passing by.
+
+I'm aware that you don't have the ability to identify people.  But using what I told you above, make your best guess.
+
 If you do not see one of these beings, just respond with:
 [Being] None
